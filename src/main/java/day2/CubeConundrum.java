@@ -1,25 +1,20 @@
 package day2;
 
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 public class CubeConundrum {
     private final String content;
-    private final int redLimit;
-    private final int blueLimit;
-    private final int greenLimit;
 
-    public CubeConundrum(String content, int redLimit, int greenLimit, int blueLimit) {
+    public CubeConundrum(String content) {
         this.content = content;
-        this.redLimit = redLimit;
-        this.blueLimit = blueLimit;
-        this.greenLimit = greenLimit;
     }
 
-    public int idsSum() {
-        return content.lines().mapToInt(this::idValueOf).sum();
+    public int idsSum(int redLimit, int greenLimit, int blueLimit) {
+        return content.lines().mapToInt(line -> idValueOf(line, redLimit, greenLimit, blueLimit)).sum();
     }
 
-    private int idValueOf(String line) {
+    private int idValueOf(String line, int redLimit, int greenLimit, int blueLimit) {
         if (maxOf("green", line) > greenLimit) {
             return 0;
         }
@@ -32,7 +27,7 @@ public class CubeConundrum {
         return gameIdOf(line);
     }
 
-    private Integer maxOf(String color, String line) {
+    private int maxOf(String color, String line) {
         var matcher = Pattern.compile("\\d+ " + color).matcher(line);
         var max = 0;
         while (matcher.find()) {
