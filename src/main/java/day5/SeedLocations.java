@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 import java.util.regex.Pattern;
-import java.util.stream.LongStream;
 
 public class SeedLocations {
     private final String content;
@@ -13,42 +12,42 @@ public class SeedLocations {
         this.content = content;
     }
 
-    public long lowestSoil() {
+    public long lowest() {
         var scanner = new Scanner(content);
-        var seeds = seedsOf(scanner.nextLine());
+        var min = Long.MAX_VALUE;
+        var matcher = Pattern.compile("\\d+").matcher(scanner.nextLine());
         scanner.nextLine();
-        return fewest(seeds, scanner).stream().mapToLong(v -> v).min().orElseThrow();
-    }
-
-    private List<Long> fewest(List<Long> seeds, Scanner scanner) {
-        if (!scanner.hasNext()) {
-            return seeds;
-        }
-        scanner.nextLine();
-        var mapNumbers = mapNumbersOf(scanner);
-        var newSeeds = seeds.stream().map(seed -> mapFor(mapNumbers, seed)).toList();
-        return fewest(newSeeds, scanner);
-    }
-
-    private long mapFor(List<long[]> mapNumbers, long seed) {
-        for (long[] mapLine : mapNumbers) {
-            var destinationRange = mapLine[0];
-            var sourceRange = mapLine[1];
-            var rangeLength = mapLine[2];
-            if (seed >= sourceRange && seed <= sourceRange + rangeLength) {
-                var offset = seed - sourceRange;
-                return destinationRange + offset;
+        var mappings = mappingsFrom(scanner);
+        while (matcher.find()) {
+            var startRange = Long.parseLong(matcher.group());
+            matcher.find();
+            var endRange = Long.parseLong(matcher.group()) + startRange;
+            for (long seed = startRange; seed <= endRange; seed++) {
+                var next = seed;
+                for (List<long[]> map : mappings) {
+                    next = mappedValueOf(map, next);
+                }
+                min = Math.min(min, next);
             }
         }
-        return seed;
+        return min;
     }
 
-    private List<long[]> mapNumbersOf(Scanner scanner) {
-        var result = new ArrayList<long[]>();
+    private List<List<long[]>> mappingsFrom(Scanner scanner) {
+        var result = new ArrayList<List<long[]>>();
+        while (scanner.hasNext()) {
+            result.add(mappingFrom(scanner));
+        }
+        return result;
+    }
+
+    private List<long[]> mappingFrom(Scanner scanner) {
+        var mapping = new ArrayList<long[]>();
+        scanner.nextLine();
         var lastLine = "lastLine";
-        while (scanner.hasNext() && lastLine != "") {
+        while (scanner.hasNext() && !lastLine.isBlank()) {
             lastLine = scanner.nextLine();
-            if (lastLine != "") {
+            if (!lastLine.isBlank()) {
                 var soilMatcher = Pattern.compile("\\d+").matcher(lastLine);
                 soilMatcher.find();
                 var destinationRange = Long.parseLong(soilMatcher.group());
@@ -57,21 +56,22 @@ public class SeedLocations {
                 soilMatcher.find();
                 var rangeLength = Long.parseLong(soilMatcher.group());
 
-                result.add(new long[] { destinationRange, sourceRange, rangeLength });
+                mapping.add(new long[] { destinationRange, sourceRange, rangeLength });
             }
         }
-        return result;
+        return mapping;
     }
 
-    private List<Long> seedsOf(String nextLine) {
-        var seeds = new ArrayList<Long>();
-        var matcher = Pattern.compile("\\d+").matcher(nextLine);
-        while (matcher.find()) {
-            var startRange = Long.parseLong(matcher.group());
-            matcher.find();
-            var endRange = Long.parseLong(matcher.group()) + startRange + 1;
-            LongStream.range(startRange, endRange).forEach(seeds::add);
+    private long mappedValueOf(List<long[]> mapping, long value) {
+        for (long[] mapLine : mapping) {
+            var destinationRange = mapLine[0];
+            var sourceRange = mapLine[1];
+            var rangeLength = mapLine[2];
+            if (value >= sourceRange && value <= sourceRange + rangeLength - 1) {
+                var offset = value - sourceRange;
+                return destinationRange + offset;
+            }
         }
-        return seeds;
+        return value;
     }
 }
