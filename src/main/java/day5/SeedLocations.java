@@ -1,5 +1,7 @@
 package day5;
 
+import com.google.common.collect.Range;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -22,6 +24,7 @@ public class SeedLocations {
             var startRange = Long.parseLong(matcher.group());
             matcher.find();
             var endRange = Long.parseLong(matcher.group()) + startRange;
+
             for (long seed = startRange; seed <= endRange; seed++) {
                 var next = seed;
                 for (List<long[]> map : mappings) {
