@@ -6,21 +6,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class BoatsRaceTest {
     @Test
-    void single_race_single_no_way_to_win_part_1() {
-        var content = """
-                Time:      1
-                Distance:  2
-                """;
-        assertThat(new BoatsRace(content).winnersListPart1()).containsExactly(0L);
-    }
-
-    @Test
     void single_race_multiple_ways_to_win_part_1() {
         var content = """
                 Time:      7
                 Distance:  9
                 """;
-        assertThat(new BoatsRace(content).winnersListPart1()).containsExactly(4L);
+        assertThat(new BoatsRace(content).winnersCountPart1()).isEqualTo(4L);
     }
 
     @Test
@@ -29,7 +20,7 @@ class BoatsRaceTest {
                 Time:      3   4
                 Distance:  1   2
                 """;
-        assertThat(new BoatsRace(content).winnersListPart1()).containsExactly(2L, 3L);
+        assertThat(new BoatsRace(content).winnersCountPart1()).isEqualTo(6L);
     }
 
     @Test

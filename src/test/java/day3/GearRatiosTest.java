@@ -136,6 +136,16 @@ class GearRatiosTest {
         assertThat(new GearRatios(content).gearRatiosSum()).isEqualTo(0);
     }
 
+    @Test
+    void retrieves_gear_ratios_sum_when_multiple_gear_ratios() {
+        var content = """
+                3*2
+                ...
+                4*3
+                """;
+        assertThat(new GearRatios(content).gearRatiosSum()).isEqualTo(18);
+    }
+
     // This case seems unnecessary, as this never happens apparently
     // @Test
     void retrieves_gear_ratios_sum_when_double_symbol() {

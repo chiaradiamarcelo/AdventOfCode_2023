@@ -13,32 +13,11 @@ public class BoatsRace {
     }
 
     public long winnersCountPart1() {
-        var result = 1;
-        var winnersList = winnersListPart1();
-        for (long winnersCount : winnersList) {
-            result *= winnersCount;
-        }
-        return result;
-    }
-
-    public List<Long> winnersListPart1() {
         var lines = content.lines().toList();
-        var times = parseValues(lines.get(0));
-        var distances = parseValues(lines.get(1));
-        return IntStream.range(0, times.size())
-                .mapToObj(i -> winnersList(Long.parseLong(times.get(i)), Long.parseLong(distances.get(i)))).toList();
-    }
-
-    private long winnersList(long time, long distance) {
-        var result = new ArrayList<Long>();
-        for (long i = 0; i < time; i++) {
-            var speed = i;
-            var myDistance = speed * (time - i);
-            if (myDistance > distance) {
-                result.add(i);
-            }
-        }
-        return result.size();
+        var times = parseValues(lines.get(0)).stream().map(Long::parseLong).toList();
+        var distances = parseValues(lines.get(1)).stream().map(Long::parseLong).toList();
+        return IntStream.range(0, times.size()).mapToObj(i -> winnersList(times.get(i), distances.get(i))).reduce(1L,
+                (a, b) -> a * b);
     }
 
     public long winnersCountPart2() {
@@ -46,6 +25,27 @@ public class BoatsRace {
         var time = Long.parseLong(String.join("", parseValues(lines.get(0))));
         var distance = Long.parseLong(String.join("", parseValues(lines.get(1))));
         return winnersList(time, distance);
+    }
+
+    private long winnersList(long time, long distance) {
+        var firstWinner = findFirstWinner(time, distance, time);
+        var lastWinner = time - firstWinner;
+        return lastWinner - firstWinner + 1;
+    }
+
+    private long findFirstWinner(long time, long distance, long high) {
+        var index = -1L;
+        var low = 1L;
+        while (low <= high) {
+            long mid = low + ((high - low) / 2);
+            if (mid * (time - mid) <= distance) {
+                low = mid + 1;
+            } else {
+                high = mid - 1;
+                index = mid;
+            }
+        }
+        return index;
     }
 
     private List<String> parseValues(String line) {
